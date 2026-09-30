@@ -1,0 +1,118 @@
+import random
+
+health = 100
+score = 0
+treasures = 0
+status_message = "Reach safe zone(S) before your health runs out!"
+
+tile_choices = [".", "T", "E", "P"]
+tile_weights = [5, 2, 3, 1]
+
+city = []
+for r in range(5):
+    row = []
+    for c in range(5):
+        chosen_tile = random.choices(tile_choices, weights=tile_weights)[0]
+        row.append(chosen_tile)
+    city.append(row)
+
+
+city[0][0] = "D" 
+city[4][4] = "S" 
+
+
+def display_city():
+    print("=== DRAGON CITY ===")
+    for row in city:
+        print(" ".join(row))
+    print("===================")
+
+
+def display_stats():
+    print("Health: " + str(health) + " | Score: " + str(score) + " | Treasures: " + str(treasures))
+    if status_message != "":
+        print("Status: " + status_message)
+
+
+def find_dragon():
+    for r in range(5):
+        for c in range(5):
+            if city[r][c] == "D":
+                return r, c
+    return None
+
+
+def handle_square(tile):
+    global health, score, treasures, status_message
+
+    if tile == "E":
+        health = health - 20
+        status_message = "You got damage an enemy! Lose 20 health!"
+    elif tile == "T":
+        score = score + 100
+        treasures = treasures + 1
+        status_message = "You found secret treasures! (gain 100 points)"
+    elif tile == "P":
+        health = health + 20 
+        status_message = " You got potion! (gain 20 Health)"
+    elif tile == "S":
+        status_message = "VICTORYYY! You escaped into the safe zone!"
+    else:
+        status_message = "Moved onto an empty space."
+
+
+def move_player(direction):
+    global status_message
+
+    
+    current_r, current_c = find_dragon()
+    new_r = current_r
+    new_c = current_c
+
+    
+    if direction == "W":
+        new_r = new_r - 1
+    elif direction == "S":
+        new_r = new_r + 1
+    elif direction == "A":
+        new_c = new_c - 1
+    elif direction == "D":
+        new_c = new_c + 1
+    else:
+        status_message = "Invalid key! Use W, A, S, or D."
+        return
+
+    
+    if new_r < 0 or new_r > 4 or new_c < 0 or new_c > 4:
+        status_message = "🚫 You runner!! Stay inside the 5x5 city."
+        return
+
+    
+    target_tile = city[new_r][new_c]
+
+    
+    city[current_r][current_c] = "."
+    city[new_r][new_c] = "D"
+
+    
+    handle_square(target_tile)
+
+
+
+while True:
+    display_city()
+    display_stats()
+
+    
+    if health <= 0:
+        print(" Game Over! Your dragon was killed.")
+        break
+
+    if find_dragon() == (4, 4):
+        print(" Victorious you are!!!!! You reached the safe zone!")
+        break
+
+    player_input = input("Move (W=up, A=left, S=down, D=right): ").strip().upper()
+    move_player(player_input)
+
+
